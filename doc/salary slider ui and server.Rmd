@@ -6,7 +6,7 @@ output: html_notebook
 ```{r}
 library(shiny)
 library(DT)
-library("varhandle")
+library(varhandle)
 ```
 
 ```{r}
@@ -55,7 +55,8 @@ server=function(input,output){
   minsala=jobs3$Salary.Range.From
   maxsala=jobs3$Salary.Range.To
   output$NYC_jobs=renderDataTable(
-    jobs%>%filter(minsala>input$slider1[1] & maxsala<input$slider1[2]),options = list(pageLength = 5)
+    jobs%>%filter(minsala>input$slider1[1] & maxsala<input$slider1[2]),
+    options = list(pageLength = 5)
   )
   }
 shinyApp(ui=ui,server=server)
