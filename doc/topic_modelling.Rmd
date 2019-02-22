@@ -128,5 +128,14 @@ assignments <- read.csv('/Users/tayhuichiang94/Desktop/columbia stuff/applied da
 assignments$V1 <- as.factor(assignments$V1)
 jobs <- merge(jobs, assignments, by.x='Job.ID', by.y='X')
 
+library(plyr)
+
+factor(jobs$V1) <- revalue(factor(jobs$V1), 
+        c('1' = "Policy & Regulation", '2' = "Engineering", '3' = "Database", 
+                   '4' = "Legal", '5'= "Communication & Writing", 
+                   '6' = "Systems & Technology", '7' = "Leadership", '8' = "Teamwork", 
+                   '9' = "Data Analysis", '10' = "Microsoft Office"))
+names(jobs)[32] <- "Main Skill"
+
 write.csv(jobs, file = '/Users/tayhuichiang94/Desktop/columbia stuff/applied data science/ADS_ht2490/Spring2019-Proj2-grp10/data/job.csv',row.names=FALSE)
 ```

@@ -1,0 +1,51 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(shiny)
+library(DT)
+library(varhandle)
+```
+
+```{r}
+jobs=read.csv('/Users/tayhuichiang94/Desktop/columbia stuff/applied data science/ADS_ht2490/Spring2019-Proj2-grp10/data/job.csv')
+```
+
+```{r}
+head(jobs)
+```
+
+
+
+```{r}
+ui <- pageWithSidebar(
+  
+  # App title ----
+  headerPanel("Salary"),
+  
+  # Sidebar panel for inputs ----,DT::dataTableOutput("NYC_jobs")
+  sidebarPanel(
+    selectInput("variable", "Variable:",
+                c("Policy & Regulation" = "Policy & Regulation", 
+                  "Engineering" = "Engineering", "Database" = "Database", 
+                  "Legal" = "Legal", "Communication & Writing" = "Communication & Writing",
+                  "Systems & Technology" = "Systems & Technology", 
+                  "Leadership" = "Leadership", "Teamwork" = "Teamwork",
+                  "Data Analysis" = "Data Analysis", 
+                  "Microsoft Office" = "Microsoft Office"))),
+  
+  # Main panel for displaying outputs ----
+  mainPanel(dataTableOutput("NYC_jobs"))
+)
+server=function(input,output){
+  output$NYC_jobs=renderDataTable(
+    jobs%>%filter(jobs$"Main.Skill"==input$variable),options = list(pageLength = 5)
+  )
+  }
+shinyApp(ui=ui,server=server)
+
+```
+
+
