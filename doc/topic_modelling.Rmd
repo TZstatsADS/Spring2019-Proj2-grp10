@@ -139,3 +139,46 @@ names(jobs)[32] <- "Main Skill"
 
 write.csv(jobs, file = '/Users/tayhuichiang94/Desktop/columbia stuff/applied data science/ADS_ht2490/Spring2019-Proj2-grp10/data/job.csv',row.names=FALSE)
 ```
+
+```{r}
+#Crime data
+#Import data set
+crime <- read.csv('/Users/tayhuichiang94/Desktop/columbia stuff/applied data science/ADS_ht2490/Spring2019-Proj2-grp10/data/NYC_crime.csv', header=TRUE)
+
+#Add zip codes
+crime$zip <- NA
+for (i in 1:146){
+  print(i)
+  temp <- try((revgeo(crime$Longitude[i], crime$Latitude[i], 
+                                            provider='google',
+                                            API='AIzaSyD94oeHgQuHD6vCpWq8gYJlVB0vn8I17Dc', 
+                                            item='zip',output='frame')$zip),silent=TRUE)
+  if (is.factor(temp)==TRUE){
+    crime$zip[i] <- as.numeric(levels(temp))
+  }
+  else{
+    crime$zip[i] <- NA
+  }
+ 
+}
+write.csv(subway, 
+          file = '/Users/tayhuichiang94/Desktop/columbia stuff/applied data science/ADS_ht2490/Spring2019-Proj2-grp10/data/NYC_crime.csv',row.names=FALSE)
+```
+
+```{r}
+#Reshape data
+library(sqldf)
+zip_crimes <- sqldf("SELECT zip,
+                    COUNT(LAW_CAT_CD = 'FELONY') AS Felony,  
+                    COUNT(LAW_CAT_CD = 'MISDEMEANOR') AS Misdemeanor,
+                    COUNT(LAW_CAT_CD = 'VIOLATION') AS Violation 
+                    FROM crime GROUP BY zip")
+
+#Crime score: Violation = 1, Misdemeanor = 2, Felony = 3
+zip_crimes$score <- zip_crimes$Violation + 2*zip_crimes$Misdemeanor + 3*zip_crimes$Felony
+
+jobs <- merge(jobs, zip_crimes, by='zip', all.x=TRUE)
+jobs <- jobs[,-c(33,34,35)]
+
+write.csv(jobs, file = '/Users/tayhuichiang94/Desktop/columbia stuff/applied data science/ADS_ht2490/Spring2019-Proj2-grp10/data/job.csv',row.names=FALSE)
+```

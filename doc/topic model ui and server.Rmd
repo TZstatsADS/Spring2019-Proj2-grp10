@@ -34,14 +34,21 @@ ui <- pageWithSidebar(
                   "Systems & Technology" = "Systems & Technology", 
                   "Leadership" = "Leadership", "Teamwork" = "Teamwork",
                   "Data Analysis" = "Data Analysis", 
-                  "Microsoft Office" = "Microsoft Office"))),
+                  "Microsoft Office" = "Microsoft Office")),
+    selectInput("crime", "Crime:",
+                c("Low" = '18', 
+                  "Medium" = '30', 
+                  "High" = '99', 
+                  "All" = 'NA'))),
   
   # Main panel for displaying outputs ----
   mainPanel(dataTableOutput("NYC_jobs"))
 )
 server=function(input,output){
   output$NYC_jobs=renderDataTable(
-    jobs%>%filter(jobs$"Main.Skill"==input$variable),options = list(pageLength = 5)
+    jobs%>%
+      filter(jobs$'score' <= input$crime & jobs$'Main.Skill'==input$variable) 
+    ,options = list(pageLength=5)
   )
   }
 shinyApp(ui=ui,server=server)
