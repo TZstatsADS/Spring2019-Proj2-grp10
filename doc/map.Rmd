@@ -1,0 +1,214 @@
+---
+title: "skillsInput"
+author: "Su Feng(fs2658)"
+date: "2019Äê2ÔÂ21ÈÕ"
+output: html_document
+---
+
+```{r}
+job=read.csv("C:/Users/Alienware/Desktop/job(1).csv",stringsAsFactors = F)
+```
+```{r}
+library(shiny)
+library(dplyr)
+```
+
+
+
+
+
+```{r}
+library(leaflet)
+```
+
+
+
+```{r}
+ui=fluidPage(
+    
+  # Copy the line below to make a select box 
+  selectInput("select", label = h3("Select box"), 
+    choices = list("Choice 1" = 1, "Choice 2" = 2, "Choice 3" = 3), 
+    selected = 1),
+  
+  hr(),
+  fluidRow(column(3, verbatimTextOutput("value")))
+  
+)
+server=function(input, output) {
+
+  # You can access the value of the widget with input$select, e.g.
+  output$value <- renderPrint({ input$select })
+
+}
+shinyApp(ui, server)
+```
+
+```{r}
+zips=read.csv("C:/Users/Alienware/Desktop/zips.csv",stringsAsFactors = F)
+zips=zips[!is.na(zips$zip),]
+zips=zips[zips$zip!=-74.0109144&zips$zip!=1373&zips$zip!=7751,]
+#table(zips$zip)
+zips2=zips%>% 
+  group_by(zip) %>%
+  summarize(index=n())
+zips2=data.frame(zips2,stringsAsFactors = F)
+zips2$maxsala=rep(1,109)
+for (i in seq(1,109,1)) {
+  zips2[i,3]=sum(zips[zips$zip==zips2[i,1],2])/zips2[i,2]
+  
+}
+zips2
+#zips[is.na(zips$zip),]
+
+
+
+
+
+```
+
+```{r}
+save(zips2, file = "C:/Users/Alienware/Desktop/zip.RData",)
+
+```
+
+```{r}
+load("C:/Users/Alienware/Desktop/zip.RData")
+
+```
+
+
+
+```{r}
+#class(zips2[1,3])
+#zips2[1,3]
+class(zips[zips$zip==zips2[1,1],2])
+#zips[zips$zip==zips2[1,3],2]
+```
+
+
+
+```{r}
+head(zips)
+```
+
+
+
+
+
+```{r}
+ui <- fluidPage(
+ leafletOutput("mymap",height = 1000)
+)
+server=function(input,output){
+  pal <- colorFactor(topo.colors(5), zips$type)
+  output$mymap <- renderLeaflet({
+   m <- leaflet(data = zips) %>%
+          addTiles() %>%
+          setView(lng=-73.98928, lat = 40.75042 , zoom =13)%>%
+          addProviderTiles("Stamen.TonerLite") %>%
+          addPolygons(layerId = ~zip,
+                   stroke = T,smoothFactor = 0.2,
+                   fillOpacity = 0.95,
+                   color = ~pal(type))
+  }
+  )
+}
+shinyApp(ui, server)
+```
+
+```{r}
+zips$type=rep(NA,3780)
+zips[zips$Salary.Range.To>150000 ,3]="highclass"
+zips[zips$Salary.Range.To>100000 &zips$Salary.Range.To<=150000,3]="uppersecondclass"
+zips[zips$Salary.Range.To<=100000 &zips$Salary.Range.To>50000,3]="lowersecondclass"
+zips[zips$Salary.Range.To<=50000 ,3]="lowclass"
+zips
+```
+
+
+
+```{r}
+load("C:/Users/Alienware/Desktop/subdat.RData")
+```
+
+```{r}
+class(subdat$value)
+subdat$ZIPCODE=zips2$zip[52:102]
+#subdat$zip=zips2$zip[52:109]
+subdat$value=zips2$maxsala[52:102]
+#subdat$=zips2$maxsala[52:109]
+#class(subdat$ZIPCODE)
+#class(subdat)
+
+```
+
+```{r}
+zips2$zip[52:102]
+zips2$zip[1:51]
+```
+
+
+
+```{r}
+zips2$zip[1:51]
+```
+
+
+```{r}
+Sr1 = SpatialPolygons(cbind(c(2,4,4,1,2),c(2,3,5,4,2)))
+class(Sr1)
+```
+
+```{r}
+ui <- fluidPage(
+ leafletOutput("mymap",height = 1000)
+)
+server=function(input,output){
+ 
+  output$mymap <- renderLeaflet({
+   m <- leaflet(data = subdat) %>%
+          addTiles() %>%
+          setView(lng=-73.98928, lat = 40.75042 , zoom =13)%>%
+          addProviderTiles("Stamen.TonerLite")})
+      pal <- colorNumeric(
+       palette = "Blues",
+       domain = subdat$value
+       )
+     leafletProxy("mymap",data=subdat)%>%
+       addPolygons(layerId = ~ZIPCODE,
+                   stroke = T, weight=1,
+                   fillOpacity = 0.95,
+                   color = ~pal(value),
+                   highlightOptions = highlightOptions(color='#ff0000', opacity = 0.5, weight = 4, fillOpacity = 0.9,bringToFront = TRUE, sendToBack = TRUE))%>%
+addLegend(pal = pal, values = ~value, opacity = 1)
+  }
+  
+shinyApp(ui, server)
+```
+
+```{r}
+ui <- fluidPage(
+ leafletOutput("mymap",height = 1000)
+)
+server=function(input,output){
+ 
+ output$map <- renderLeaflet({
+    leaflet(data=data) %>%
+      addProviderTiles('Esri.WorldTopoMap') %>%
+      setView(lng = -73.971035, lat = 40.775659, zoom = 12) %>%
+      addMarkers(data=data,
+               lng=~as.numeric(data$lon),
+               lat=~as.numeric(data$lat),
+               clusterOptions=markerClusterOptions(),
+               group="housing_cluster"
+    )
+  })
+}
+shinyApp(ui, server)
+```
+
+```{r}
+job$
+```
+
