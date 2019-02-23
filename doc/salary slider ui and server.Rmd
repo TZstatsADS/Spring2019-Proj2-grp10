@@ -1,0 +1,92 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(shiny)
+library(DT)
+```
+
+```{r}
+jobs=read.csv("C:/Users/Alienware/Desktop/NYC_Jobs.csv")
+```
+
+```{r}
+head(jobs)
+```
+
+
+```{r}
+ui=fluidPage(sliderInput("slider2",label = h3("Annual Salary") ,min=20000,max=250000,value=c(50000,20000)),DT::dataTableOutput("NYC_jobs"))
+server=function(input,output){
+  output$NYC_jobs=DT::renderDataTable(
+    DT::datatable(jobs%>%filter(minsala>50000 & maxsala<100000),options = list(pageLength = 5)
+    
+  )
+  )
+  }
+shinyApp(ui=ui,server=server)
+```
+
+
+
+```
+
+
+```
+
+```{r}
+
+jobs2=jobs[jobs$Salary.Frequency=="Daily",]
+jobs2$Salary.Range.From=unfactor(jobs2$Salary.Range.From)*356
+jobs2$Salary.Range.To=unfactor(jobs2$Salary.Range.To)*356
+jobs22=jobs[jobs$Salary.Frequency=="Hourly",]
+jobs22$Salary.Range.From=unfactor(jobs22$Salary.Range.From)*356*8
+jobs22$Salary.Range.To=unfactor(jobs22$Salary.Range.To)*356*8
+jobs3=jobs
+jobs3$Salary.Range.From=unfactor(jobs3$Salary.Range.From)
+jobs3$Salary.Range.To=unfactor(jobs3$Salary.Range.To)
+jobs3[jobs3$Job.ID%in%jobs2$Job.ID, ] <- jobs2
+jobs3[jobs3$Job.ID%in%jobs22$Job.ID, ] <- jobs22
+
+
+
+```
+
+```{r}
+ui <- pageWithSidebar(
+  
+  # App title ----
+  headerPanel("Salary"),
+  
+  # Sidebar panel for inputs ----,DT::dataTableOutput("NYC_jobs")
+  sidebarPanel(
+  sliderInput("slider1",label = h3("maximum Annual Salary") ,min=20000,max=250000,value=c(10000,20000))),
+  
+  # Main panel for displaying outputs ----
+  mainPanel(dataTableOutput("NYC_jobs"))
+)
+server=function(input,output){
+  minsala=jobs3$Salary.Range.From
+  maxsala=jobs3$Salary.Range.To
+  output$NYC_jobs=renderDataTable(
+    jobs%>%filter(minsala>input$slider1[1] & maxsala<input$slider1[2]),options = list(pageLength = 5)
+  )
+  }
+shinyApp(ui=ui,server=server)
+```
+
+
+```{r}
+library("varhandle")
+```
+
+
+
+```{r}
+minsala=unfactor(jobs$Salary.Range.From)
+maxsala=unfactor(jobs$Salary.Range.To)
+filter(jobs,minsala>50000 & maxsala<100000)
+```
+
