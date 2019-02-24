@@ -1,0 +1,97 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(shiny)
+library(DT)
+library(varhandle)
+```
+
+```{r}
+jobs=read.csv('/Users/tayhuichiang94/Desktop/columbia stuff/applied data science/ADS_ht2490/Spring2019-Proj2-grp10/data/job.csv')
+```
+
+```{r}
+head(jobs)
+```
+
+```{r}
+labels_sales <- sprintf(
+  "Zip Code: <strong>%s</strong><br/>Average Annual Salary (AAS): <strong>$%g/yr<sup></sup></strong>",
+  as.character(subdat$ZIPCODE), subdat$value
+) %>% lapply(htmltools::HTML)
+
+zips=read.csv("/Users/tayhuichiang94/Desktop/columbia stuff/applied data science/ADS_ht2490/Spring2019-Proj2-grp10/data/zips2.csv",stringsAsFactors = F)
+
+```
+
+
+```{r}
+category=c("Administration","Building","Clerical","Communications","Community","Constituent","Engineering","Finance","Health","Information","Legal","Maintenance","Policy","Public","Social","Technology")
+
+ui=fluidPage(includeCSS("/Users/tayhuichiang94/Desktop/columbia stuff/applied data science/ADS_ht2490/Spring2019-Proj2-grp10/app/style.css"),navbarPage(p(class="h","JobsSmart"),id = "inTabset",
+  tabPanel("All about Jobs",
+           leafletOutput("mymap",height = 1000)),
+  tabPanel("Recommendation",
+           sidebarPanel(
+            sliderInput("slider1",label = h3("maximum Annual Salary")
+                        ,min=20000,max=250000,value=c(10000,20000))),
+            selectInput("variable", "Variable:",
+                c("Policy & Regulation" = "Policy & Regulation", 
+                  "Engineering" = "Engineering", "Database" = "Database", 
+                  "Legal" = "Legal", "Communication & Writing" = "Communication & Writing",
+                  "Systems & Technology" = "Systems & Technology", 
+                  "Leadership" = "Leadership", "Teamwork" = "Teamwork",
+                  "Data Analysis" = "Data Analysis", 
+                  "Microsoft Office" = "Microsoft Office")),
+            selectInput("crime", "Crime:",
+                c("Low" = '18', 
+                  "Medium" = '30', 
+                  "High" = '99', 
+                  "All" = 'NA')),
+            selectInput("speech1","Choose a job category" ,category
+                              )
+           ),
+  
+  # Main panel for displaying outputs ----
+   mainPanel(tags$head(tags$style("#NYC_jobs {white-space: nowrap;}")),
+            dataTableOutput("NYC_jobs"))
+))
+server=function(input, output) {
+  output$mymap <- renderLeaflet({
+   m <- leaflet(data = subdat) %>%
+          addTiles() %>%
+          setView(lng=-73.98928, lat = 40.75042 , zoom =12)%>%
+          addProviderTiles("Stamen.TonerLite")})
+      pal <- colorNumeric(
+       palette = "Purples",
+       domain = subdat$value
+       )
+     leafletProxy("mymap",data=subdat)%>%
+       addPolygons(layerId = ~ZIPCODE,
+                   stroke = T, weight=1,
+                   fillOpacity = 0.95,
+                   color = ~pal(value),
+                   highlightOptions = highlightOptions(color='#ff0000', opacity = 0.5, weight = 4, fillOpacity = 0.9,bringToFront = TRUE, sendToBack = TRUE),label = labels_sales,
+        labelOptions = labelOptions(
+          style = list("font-weight" = "normal", padding = "3px 8px"),
+          textsize = "15px",
+          direction = "auto"))%>%
+addLegend(pal = pal, values = ~value, opacity = 1)
+     minsala=jobs$Salary.Range.From
+  maxsala=jobs$Salary.Range.To
+  
+  output$NYC_jobs=renderDataTable(
+    jobs%>%filter(minsala>input$slider1[1] & maxsala<input$slider1[2]&
+      jobs$'score' <= input$crime & jobs$'Main.Skill'==input$variable & jobs$'Department' == input$'speech1') 
+    ,options = list(pageLength=5, scrollX = TRUE, scrollY = TRUE
+  ))
+  
+
+}
+shinyApp(ui, server)
+
+
+```
