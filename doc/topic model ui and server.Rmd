@@ -42,14 +42,15 @@ ui <- pageWithSidebar(
                   "All" = 'NA'))),
   
   # Main panel for displaying outputs ----
-  mainPanel(dataTableOutput("NYC_jobs"))
+  mainPanel(tags$head(tags$style("#NYC_jobs {white-space: nowrap;}")),
+            dataTableOutput("NYC_jobs"))
 )
 server=function(input,output){
   output$NYC_jobs=renderDataTable(
     jobs%>%
       filter(jobs$'score' <= input$crime & jobs$'Main.Skill'==input$variable) 
-    ,options = list(pageLength=5)
-  )
+    ,options = list(pageLength=5, scrollX = TRUE, scrollY = TRUE
+  ))
   }
 shinyApp(ui=ui,server=server)
 
