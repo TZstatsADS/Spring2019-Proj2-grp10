@@ -31,7 +31,14 @@ zips=read.csv("C:/Users/Alienware/Desktop/ads project1/Spring2019-Proj2-grp10/da
 ```{r}
 category=c("Administration","Building","Clerical","Communications","Community","Constituent","Engineering","Finance","Health","Information","Legal","Maintenance","Policy","Public","Social","Technology")
 
-ui=fluidPage(includeCSS("C:/Users/Alienware/Desktop/ads project1/Spring2019-Proj2-grp10//app/style.css"),navbarPage(p(class="h","JobsSmart"),id = "inTabset",
+jobs=read.csv('../data/job.csv', header=TRUE)
+subway <- read.csv('../data/subwayinfo.csv', header=TRUE)
+bar <- read.csv('../data/Bars.csv', header=TRUE)
+bus <- read.csv('../data/bus_stop.csv', header=TRUE)
+Cinema <- read.csv('../data/theatre_dxy.csv', header=TRUE)
+
+
+ui=fluidPage(includeCSS("../app/style.css"),navbarPage(p(class="h","JobsSmart"),id = "inTabset",
   tabPanel("All about Jobs",
            leafletOutput("mymap",height = 1000)),
   tabPanel("Recommendation",
@@ -90,26 +97,26 @@ addLegend(pal = pal, values = ~value, opacity = 1)
   ))
   
   output$mymap2 <- renderLeaflet({
-   m <- leaflet(data=data) %>%
+   m <- leaflet(data=jobs) %>%
           addTiles() %>%
           setView(lng=-73.98928, lat=40.75042 , zoom=17)%>%
           addProviderTiles("Stamen.TonerLite")%>%
           addMarkers(lng = ~bar$Longitude,
                      lat = ~bar$Latitude
                      ,
-                     icon = list(iconUrl='C:/Users/Alienware/Desktop/ads project1/Spring2019-Proj2-grp10/lib/bar.png',iconSize=c(15,15)))%>%
+                     icon = list(iconUrl='../lib/bar.png',iconSize=c(15,15)))%>%
      addMarkers(lng = ~bus$LONGITUDE,
                      lat = ~bus$LATITUDE
                      ,
-                     icon = list(iconUrl='C:/Users/Alienware/Desktop/ads project1/Spring2019-Proj2-grp10/lib/bus.png',iconSize=c(15,15)))%>%
-      addMarkers(lng = ~Cinmea$lon,
-                     lat = ~Cinmea$lat
+                     icon = list(iconUrl='../lib/bus.png',iconSize=c(15,15)))%>%
+      addMarkers(lng = ~Cinema$lon,
+                     lat = ~Cinema$lat
                      ,
-                     icon = list(iconUrl='C:/Users/Alienware/Desktop/ads project1/Spring2019-Proj2-grp10/lib/Movie.png',iconSize=c(15,15)))%>%
+                     icon = list(iconUrl='../lib/Movie.png',iconSize=c(15,15)))%>%
       addMarkers(lng = ~subway$Station.Longitude,
                      lat = ~subway$Station.Latitude
                      ,
-                     icon = list(iconUrl='C:/Users/Alienware/Desktop/ads project1/Spring2019-Proj2-grp10/lib/metro.png',iconSize=c(15,15)))
+                     icon = list(iconUrl='../lib/metro.png',iconSize=c(15,15)))
      
                      
                      
