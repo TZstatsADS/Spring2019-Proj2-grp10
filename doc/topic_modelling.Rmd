@@ -1,0 +1,184 @@
+---
+title: "topic_modelling"
+author: "Hui Chiang"
+date: "21/02/2019"
+output: html_document
+---
+
+```{r}
+#Topic Modelling
+library(tm)
+library(topicmodels)
+jobs <- read.csv('/Users/tayhuichiang94/Downloads/job.csv', header=TRUE)
+
+#Create corpus
+docs <- Corpus(VectorSource(jobs$Preferred.Skills))
+
+#Preprocessing
+#Transform to lower case
+docs <-tm_map(docs,content_transformer(tolower))
+
+#Remove symbols
+toSpace <- content_transformer(function(x, pattern) { return (gsub(pattern, " " , x))})
+docs <- tm_map(docs, toSpace, '-')
+docs <- tm_map(docs, toSpace, '’')
+docs <- tm_map(docs, toSpace, '‘')
+docs <- tm_map(docs, toSpace, '•')
+docs <- tm_map(docs, toSpace, '”')
+docs <- tm_map(docs, toSpace, '“')
+docs <- tm_map(docs, toSpace, 'â')
+docs <- tm_map(docs, toSpace, '€')
+docs <- tm_map(docs, toSpace, '¢')
+docs <- tm_map(docs, toSpace, '™')
+
+#Remove punctuation
+docs <- tm_map(docs, removePunctuation)
+
+#Strip digits
+docs <- tm_map(docs, removeNumbers)
+
+#Remove stopwords
+docs <- tm_map(docs, removeWords, stopwords('english'))
+
+#Remove whitespace
+docs <- tm_map(docs, stripWhitespace)
+
+#Check document
+#writeLines(as.character(docs[[30]]))
+
+#Stem document
+docs <- tm_map(docs,stemDocument)
+
+#Define and remove more stopwords
+myStopwords <- c('can', 'say','one','way','use','also','howev','tell','will','much','need',
+                 'take','tend','even','like','particular','rather','said','get','well',
+                 'make','ask','come','end','first','two','help','often','may','might','see',
+                 'someth','thing','point','post','look','right','now','think','‘ve ','‘re',
+                 'anoth','put','set','new','good','want','sure','kind','larg','yes,','day',
+                 'etc','quit','sinc','attempt','lack','seen','awar','littl','ever','moreov',
+                 'though','found','abl','enough','far','earli','away','achiev','draw','last',
+                 'never','brief','bit','entir','brief','great','lot', 'skill', 'abil','work',
+                 'must','strong','experi','candid','prefer','possess','requir','posit','year'
+                 ,'andor','time')
+
+docs <- tm_map(docs, removeWords, myStopwords)
+
+#Inspect a document as a check
+#writeLines(as.character(docs[[30]]))
+
+#Create document-term matrix
+dtm <- DocumentTermMatrix(docs)
+
+#Change rownames
+rownames(dtm) <- jobs$Job.ID
+
+#Collapse matrix by summing over columns
+freq <- colSums(as.matrix(dtm))
+
+#Length should be total number of terms
+length(freq)
+
+#Create sort order (descending)
+ord <- order(freq,decreasing=TRUE)
+
+#List all terms in decreasing order of freq and write to disk
+freq[ord]
+
+#Set Gibbs Sampler parameters
+burnin <- 5000
+iter <- 3000
+thin <- 500
+seed <-list(2003,5,63,100001,765)
+nstart <- 5
+best <- TRUE
+k <- 12
+
+#Run LDA using Gibbs sampling
+raw.sum=apply(dtm,1,FUN=sum)
+dtm=dtm[raw.sum!=0,]
+ldaOut <-LDA(dtm,k, method='Gibbs', control=list(nstart=nstart, seed = seed, best=best, burnin = burnin, iter = iter, thin=thin))
+
+#Docs to topics
+ldaOut.topics <- as.matrix(topics(ldaOut))
+write.csv(ldaOut.topics,file='/Users/tayhuichiang94/Desktop/columbia stuff/applied data science/ADS_ht2490/Spring2019-Proj2-grp10/doc/DocsToTopics_12.csv')
+          
+#Top 10 terms in each topic
+ldaOut.terms <- as.matrix(terms(ldaOut,10))
+write.csv(ldaOut.terms,'/Users/tayhuichiang94/Desktop/columbia stuff/applied data science/ADS_ht2490/Spring2019-Proj2-grp10/doc/TopicsToTerms_12.csv')
+
+#Probabilities associated with each topic assignment
+topicProbabilities <- as.data.frame(ldaOut@gamma)
+write.csv(topicProbabilities,'/Users/tayhuichiang94/Desktop/columbia stuff/applied data science/ADS_ht2490/Spring2019-Proj2-grp10/doc/TopicProbabilities_12.csv')
+
+#Find relative importance of top 2 topics
+topic1ToTopic2 <- lapply(1:nrow(dtm),function(x)
+sort(topicProbabilities[x,])[k]/sort(topicProbabilities[x,])[k-1])
+
+#Find relative importance of second and third most important topics
+topic2ToTopic3 <- lapply(1:nrow(dtm),function(x)
+sort(topicProbabilities[x,])[k-1]/sort(topicProbabilities[x,])[k-2])
+```
+
+```{r}
+#Merge jobs.csv with our topics
+jobs <- read.csv('/Users/tayhuichiang94/Desktop/columbia stuff/applied data science/ADS_ht2490/Spring2019-Proj2-grp10/data/job.csv', header=TRUE)
+
+assignments <- read.csv('/Users/tayhuichiang94/Desktop/columbia stuff/applied data science/ADS_ht2490/Spring2019-Proj2-grp10/doc/topic_modelling/DocsToTopics_10.csv', header=TRUE)
+
+assignments$V1 <- as.factor(assignments$V1)
+jobs <- merge(jobs, assignments, by.x='Job.ID', by.y='X')
+
+library(plyr)
+
+factor(jobs$V1) <- revalue(factor(jobs$V1), 
+        c('1' = "Policy & Regulation", '2' = "Engineering", '3' = "Database", 
+                   '4' = "Legal", '5'= "Communication & Writing", 
+                   '6' = "Systems & Technology", '7' = "Leadership", '8' = "Teamwork", 
+                   '9' = "Data Analysis", '10' = "Microsoft Office"))
+names(jobs)[32] <- "Main Skill"
+
+write.csv(jobs, file = '/Users/tayhuichiang94/Desktop/columbia stuff/applied data science/ADS_ht2490/Spring2019-Proj2-grp10/data/job.csv',row.names=FALSE)
+```
+
+```{r}
+#Crime data
+#Import data set
+crime <- read.csv('/Users/tayhuichiang94/Desktop/columbia stuff/applied data science/ADS_ht2490/Spring2019-Proj2-grp10/data/NYC_crime.csv', header=TRUE)
+
+#Add zip codes
+crime$zip <- NA
+for (i in 1:146){
+  print(i)
+  temp <- try((revgeo(crime$Longitude[i], crime$Latitude[i], 
+                                            provider='google',
+                                            API='AIzaSyD94oeHgQuHD6vCpWq8gYJlVB0vn8I17Dc', 
+                                            item='zip',output='frame')$zip),silent=TRUE)
+  if (is.factor(temp)==TRUE){
+    crime$zip[i] <- as.numeric(levels(temp))
+  }
+  else{
+    crime$zip[i] <- NA
+  }
+ 
+}
+write.csv(subway, 
+          file = '/Users/tayhuichiang94/Desktop/columbia stuff/applied data science/ADS_ht2490/Spring2019-Proj2-grp10/data/NYC_crime.csv',row.names=FALSE)
+```
+
+```{r}
+#Reshape data
+library(sqldf)
+zip_crimes <- sqldf("SELECT zip,
+                    COUNT(LAW_CAT_CD = 'FELONY') AS Felony,  
+                    COUNT(LAW_CAT_CD = 'MISDEMEANOR') AS Misdemeanor,
+                    COUNT(LAW_CAT_CD = 'VIOLATION') AS Violation 
+                    FROM crime GROUP BY zip")
+
+#Crime score: Violation = 1, Misdemeanor = 2, Felony = 3
+zip_crimes$score <- zip_crimes$Violation + 2*zip_crimes$Misdemeanor + 3*zip_crimes$Felony
+
+jobs <- merge(jobs, zip_crimes, by='zip', all.x=TRUE)
+jobs <- jobs[,-c(33,34,35)]
+
+write.csv(jobs, file = '/Users/tayhuichiang94/Desktop/columbia stuff/applied data science/ADS_ht2490/Spring2019-Proj2-grp10/data/job.csv',row.names=FALSE)
+```
