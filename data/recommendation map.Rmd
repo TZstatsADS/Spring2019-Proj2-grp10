@@ -1,0 +1,71 @@
+---
+title: "Untitled"
+author: "Su Feng(fs2658)"
+date: "2019Äê2ÔÂ24ÈÕ"
+output: html_document
+---
+
+```{r}
+bar=read.csv("C:/Users/Alienware/Desktop/bars.csv",stringsAsFactors = F)
+```
+
+```{r}
+bus=read.csv("C:/Users/Alienware/Desktop/bus_stop.csv",stringsAsFactors = F)
+```
+
+```{r}
+Cinmea=read.csv("C:/Users/Alienware/Desktop/theatre_dxy.csv",stringsAsFactors = F)
+```
+
+```{r}
+subway=read.csv("C:/Users/Alienware/Desktop/subwayinfo.csv",stringsAsFactors = F)
+```
+
+
+```{r}
+ui <- fluidPage(
+ leafletOutput("mymap",height = 1000)
+)
+server=function(input,output){
+#  greenLeafIcon <- makeIcon(
+#  iconUrl = "C:/Users/Alienware/Desktop/bar.png",
+#  iconWidth = 18, iconHeight = 35,
+#  iconAnchorX = 22, iconAnchorY = 94
+#  shadowUrl = "http://leafletjs.com/examples/custom-icons/leaf-shadow.png",
+#  shadowWidth = 50, shadowHeight = 64,
+#  shadowAnchorX = 4, shadowAnchorY = 62
+#)
+  output$mymap <- renderLeaflet({
+   m <- leaflet(data = data) %>%
+          addTiles() %>%
+          setView(lng=-73.98928, lat=40.75042 , zoom=17)%>%
+          addProviderTiles("Stamen.TonerLite")%>%
+          addMarkers(lng = ~bar$Longitude,
+                     lat = ~bar$Latitude
+                     ,
+                     icon = list(iconUrl='C:/Users/Alienware/Desktop/bar.png',iconSize=c(15,15)))%>%
+     addMarkers(lng = ~bus$LONGITUDE,
+                     lat = ~bus$LATITUDE
+                     ,
+                     icon = list(iconUrl='C:/Users/Alienware/Desktop/bus.png',iconSize=c(15,15)))%>%
+      addMarkers(lng = ~Cinmea$lon,
+                     lat = ~Cinmea$lat
+                     ,
+                     icon = list(iconUrl='C:/Users/Alienware/Desktop/Movie.png',iconSize=c(15,15)))%>%
+      addMarkers(lng = ~subway$Station.Longitude,
+                     lat = ~subway$Station.Latitude
+                     ,
+                     icon = list(iconUrl='C:/Users/Alienware/Desktop/metro.png',iconSize=c(15,15)))
+     
+                     
+                     
+   m
+ })
+}
+shinyApp(ui = ui, server = server)
+
+```
+
+
+
+
