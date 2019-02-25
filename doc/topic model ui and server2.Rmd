@@ -36,7 +36,14 @@ subway <- read.csv('../data/subwayinfo.csv', header=TRUE)
 bar <- read.csv('../data/Bars.csv', header=TRUE)
 bus <- read.csv('../data/bus_stop.csv', header=TRUE)
 Cinema <- read.csv('../data/theatre_dxy.csv', header=TRUE)
+trans_time <- read.csv('../data/trans_time1.csv', header=TRUE)
 
+subway$on <- 1
+bus$on <- 1
+Cinema$on <- 1
+```
+
+```{r}
 
 ui=fluidPage(includeCSS("../app/style.css"),navbarPage(p(class="h","JobsSmart"),id = "inTabset",
   tabPanel("All about Jobs",
@@ -58,6 +65,12 @@ ui=fluidPage(includeCSS("../app/style.css"),navbarPage(p(class="h","JobsSmart"),
                   "Medium" = '30', 
                   "High" = '99', 
                   "All" = 'NA')),
+           checkboxGroupInput("map_select", "Select:",
+                c("Subway" = '1',
+                  "Bus" = '2',
+                  "Cinema" = '3'
+                  )),
+           textInput('zip_input', "Zip:"),
             selectInput("speech1","Choose a job category" ,category
                               )
            ),
@@ -91,8 +104,8 @@ addLegend(pal = pal, values = ~value, opacity = 1)
   maxsala=jobs$Salary.Range.To
   
   output$NYC_jobs=renderDataTable(
-    jobs%>%filter(minsala>input$slider1[1] & maxsala<input$slider1[2]&
-      jobs$'score' <= input$crime & jobs$'Main.Skill'==input$variable & jobs$'Department' == input$'speech1') 
+    merge(jobs%>%filter(minsala>input$slider1[1] & maxsala<input$slider1[2]&
+      jobs$'score' <= input$crime & jobs$'Main.Skill'==input$variable & jobs$'Department' == input$'speech1'), trans_time[,c('X',paste('X',input$'zip_input',sep=""))], by.x='zip', by.y='X')  
     ,options = list(pageLength=5, scrollX = TRUE, scrollY = TRUE
   ))
   
@@ -101,25 +114,23 @@ addLegend(pal = pal, values = ~value, opacity = 1)
           addTiles() %>%
           setView(lng=-73.98928, lat=40.75042 , zoom=17)%>%
           addProviderTiles("Stamen.TonerLite")%>%
-          addMarkers(lng = ~bar$Longitude,
-                     lat = ~bar$Latitude
-                     ,
-                     icon = list(iconUrl='../lib/bar.png',iconSize=c(15,15)))%>%
-     addMarkers(lng = ~bus$LONGITUDE,
-                     lat = ~bus$LATITUDE
-                     ,
+
+     addMarkers(lng = ~bus[bus$on == ifelse((2 %in% input$map_select),1,0),]$LONGITUDE,
+                     lat = ~bus[bus$on == ifelse((2 %in% input$map_select),1,0),]$LATITUDE,
                      icon = list(iconUrl='../lib/bus.png',iconSize=c(15,15)))%>%
-      addMarkers(lng = ~Cinema$lon,
-                     lat = ~Cinema$lat
-                     ,
+      addMarkers(lng = ~(Cinema[Cinema$on == ifelse((3 %in% input$map_select),1,0),])$lon,
+                     lat = ~(Cinema[Cinema$on == ifelse((3 %in% input$map_select),1,0),])$lat,
                      icon = list(iconUrl='../lib/Movie.png',iconSize=c(15,15)))%>%
-      addMarkers(lng = ~subway$Station.Longitude,
-                     lat = ~subway$Station.Latitude
-                     ,
-                     icon = list(iconUrl='../lib/metro.png',iconSize=c(15,15)))
+      addMarkers(lng = ~(subway[subway$on == ifelse((1 %in% input$map_select),1,0),])$Station.Longitude,
+                     lat = ~(subway[subway$on ==ifelse((1 %in% input$map_select),1,0),])$Station.Latitude,
+                     icon = list(iconUrl='../lib/metro.png',iconSize=c(15,15)))%>%
+      addCircleMarkers(lng = ~ (jobs%>%filter(minsala>input$slider1[1] & maxsala<input$slider1[2]&
+      jobs$'score' <= input$crime & jobs$'Main.Skill'==input$variable & jobs$'Department' == input$'speech1')) $geocodes.lon,
+                     lat = ~(jobs%>%filter(minsala>input$slider1[1] & maxsala<input$slider1[2]&
+      jobs$'score' <= input$crime & jobs$'Main.Skill'==input$variable & jobs$'Department' == input$'speech1') )$geocodes.lat,
+                    stroke = FALSE, fillOpacity = 0.5
+                     )
      
-                     
-                     
    m
  })
   
