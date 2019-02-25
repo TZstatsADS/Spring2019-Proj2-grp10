@@ -7,10 +7,17 @@ output: html_notebook
 library(shiny)
 library(DT)
 library(varhandle)
+library(magrittr)
+library(sp)
+library(leaflet)
+library(dplyr)
 ```
 
 ```{r}
-jobs=read.csv('C:/Users/Alienware/Desktop/ads project1/Spring2019-Proj2-grp10/data/job.csv')
+jobs=read.csv('../data/job.csv')
+jobs$score[is.na(jobs$score)] <- 99
+jobs <- jobs[jobs$zip>10000,]
+jobs <- jobs[is.na(jobs$Salary.Range.From) == FALSE,]
 ```
 
 ```{r}
@@ -18,12 +25,18 @@ head(jobs)
 ```
 
 ```{r}
+load('../data/subdat.RData')
+
 labels_sales <- sprintf(
   "Zip Code: <strong>%s</strong><br/>Average Annual Salary (AAS): <strong>$%g/yr<sup></sup></strong>",
   as.character(subdat$ZIPCODE), subdat$value
 ) %>% lapply(htmltools::HTML)
 
-zips=read.csv("C:/Users/Alienware/Desktop/ads project1/Spring2019-Proj2-grp10/data/zips2.csv",stringsAsFactors = F)
+zips=read.csv("../data/zips2.csv",stringsAsFactors = F)
+
+subdat$ZIPCODE=zips$zip[52:102]
+#subdat$zip=zips2$zip[52:109]
+subdat$value=zips$maxsala[52:102]
 
 ```
 
