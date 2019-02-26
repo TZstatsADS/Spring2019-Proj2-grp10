@@ -14,10 +14,7 @@ library(dplyr)
 ```
 
 ```{r}
-jobs=read.csv('../data/job.csv')
-jobs$score[is.na(jobs$score)] <- 99
-jobs <- jobs[jobs$zip>10000,]
-jobs <- jobs[is.na(jobs$Salary.Range.From) == FALSE,]
+jobs=read.csv('../data/jobs.csv')
 ```
 
 ```{r}
@@ -27,16 +24,15 @@ head(jobs)
 ```{r}
 load('../data/subdat.RData')
 
+zips=read.csv("../data/zips2.csv",stringsAsFactors = F)
+
+subdat$ZIPCODE=zips$zip[52:102]
+subdat$value=zips$maxsala[52:102]
+
 labels_sales <- sprintf(
   "Zip Code: <strong>%s</strong><br/>Average Annual Salary (AAS): <strong>$%g/yr<sup></sup></strong>",
   as.character(subdat$ZIPCODE), subdat$value
 ) %>% lapply(htmltools::HTML)
-
-zips=read.csv("../data/zips2.csv",stringsAsFactors = F)
-
-subdat$ZIPCODE=zips$zip[52:102]
-#subdat$zip=zips2$zip[52:109]
-subdat$value=zips$maxsala[52:102]
 
 ```
 
@@ -63,7 +59,7 @@ ui=fluidPage(includeCSS("../app/style.css"),navbarPage(p(class="h","JobsSmart"),
            leafletOutput("mymap",height = 1000)),
   tabPanel("Recommendation",
            sidebarPanel(
-            sliderInput("slider1",label = h3("maximum Annual Salary")
+            sliderInput("slider1",label = h3("Median Annual Salary")
                         ,min=20000,max=250000,value=c(10000,20000))),
             selectInput("variable", "Variable:",
                 c("Policy & Regulation" = "Policy & Regulation", 
@@ -113,11 +109,10 @@ server=function(input, output) {
           textsize = "15px",
           direction = "auto"))%>%
 addLegend(pal = pal, values = ~value, opacity = 1)
-     minsala=jobs$Salary.Range.From
-  maxsala=jobs$Salary.Range.To
-  
+     median=jobs$medium
+
   output$NYC_jobs=renderDataTable(
-    merge(jobs%>%filter(minsala>input$slider1[1] & maxsala<input$slider1[2]&
+    merge(jobs%>%filter(median>input$slider1[1] & median<input$slider1[2]&
       jobs$'score' <= input$crime & jobs$'Main.Skill'==input$variable & jobs$'Department' == input$'speech1'), trans_time[,c('X',paste('X',input$'zip_input',sep=""))], by.x='zip', by.y='X')  
     ,options = list(pageLength=5, scrollX = TRUE, scrollY = TRUE
   ))
@@ -137,9 +132,9 @@ addLegend(pal = pal, values = ~value, opacity = 1)
       addMarkers(lng = ~(subway[subway$on == ifelse((1 %in% input$map_select),1,0),])$Station.Longitude,
                      lat = ~(subway[subway$on ==ifelse((1 %in% input$map_select),1,0),])$Station.Latitude,
                      icon = list(iconUrl='../lib/metro.png',iconSize=c(15,15)))%>%
-      addCircleMarkers(lng = ~ (jobs%>%filter(minsala>input$slider1[1] & maxsala<input$slider1[2]&
+      addCircleMarkers(lng = ~ (jobs%>%filter(median>input$slider1[1] & median<input$slider1[2]&
       jobs$'score' <= input$crime & jobs$'Main.Skill'==input$variable & jobs$'Department' == input$'speech1')) $geocodes.lon,
-                     lat = ~(jobs%>%filter(minsala>input$slider1[1] & maxsala<input$slider1[2]&
+                     lat = ~(jobs%>%filter(median>input$slider1[1] & median<input$slider1[2]&
       jobs$'score' <= input$crime & jobs$'Main.Skill'==input$variable & jobs$'Department' == input$'speech1') )$geocodes.lat,
                     stroke = FALSE, fillOpacity = 0.5
                      )
