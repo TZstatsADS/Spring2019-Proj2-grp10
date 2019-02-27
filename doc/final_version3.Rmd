@@ -57,7 +57,7 @@ Cinema$on <- 1
 
 
 ```{r}
-ui=fluidPage(includeCSS("../app/style.css"),navbarPage(p(class="h","JobsSmart"),id = "inTabset",
+ui=fluidPage(includeCSS("../app/style.css"),navbarPage(p(class="h","SuperHunt"),id = "inTabset",
   tabPanel("All about Jobs",
            leafletOutput("mymap",height = 1000)),
   tabPanel("Recommendation",
@@ -80,7 +80,10 @@ ui=fluidPage(includeCSS("../app/style.css"),navbarPage(p(class="h","JobsSmart"),
                   "Systems & Technology" = "Systems & Technology", 
                   "Leadership" = "Leadership", "Teamwork" = "Teamwork",
                   "Data Analysis" = "Data Analysis", 
-                  "Microsoft Office" = "Microsoft Office")),
+                  "Microsoft Office" = "Microsoft Office"),multiple=TRUE),
+           selectInput("fulltime", "Full Time/Part Time:",
+                       c("Full Time" = "F",
+                        "Part Time" = "P")),
             selectInput("crime", "Safety:",
                 c("High" = '18', 
                   "Medium" = '30', 
@@ -113,7 +116,6 @@ tabPanel("Contact",fluidPage(
     h6(("Shaofu Wang")),
     h6(("sw3294@columbia.edu"))))
  ))))
-
 server=function(input, output) {
   output$mymap <- renderLeaflet({
    m <- leaflet(data = subdat) %>%
@@ -139,7 +141,8 @@ addLegend(pal = pal, values = ~value, opacity = 1)
      
      output$NYC_jobs=renderDataTable(
     merge(trans_time[,c('X',paste('X',input$'zip_input',sep=""))],jobs%>%filter(median>input$slider1[1] & median<input$slider1[2]&
-      jobs$'score' <= input$crime & (jobs$'Main.Skill'==input$variable|jobs$'Main.Skill'==input$variablee) & jobs$'Job.Category' == input$'speech1'),  by.x='X', by.y='zip')  
+      jobs$'score' <= input$crime & jobs$'Main.Skill' %in% input$variablee & jobs$'Full.Time.Part.Time.indicator' == input$fulltime &
+        jobs$'Job.Category' == input$'speech1'),  by.x='X', by.y='zip')  
     ,options = list(pageLength=5, scrollX = TRUE, scrollY = TRUE
   ))
      output$mymap2 <- renderLeaflet({
@@ -157,9 +160,11 @@ addLegend(pal = pal, values = ~value, opacity = 1)
                      lat = ~(subway[subway$on ==ifelse((1 %in% input$map_select),1,0),])$Station.Latitude,
                      icon = list(iconUrl='../lib/metro.png',iconSize=c(15,15)))%>%
       addCircleMarkers(lng = ~ (jobs%>%filter(median>input$slider1[1] & median<input$slider1[2]&
-      jobs$'score' <= input$crime & (jobs$'Main.Skill'==input$variable|jobs$'Main.Skill'==input$variablee) & jobs$'Job.Category' == input$'speech1')) $geocodes.lon,
+      jobs$'score' <= input$crime & jobs$'Main.Skill' %in% input$variablee & jobs$Full.Time.Part.Time.indicator == input$fulltime &
+        jobs$'Job.Category' == input$'speech1')) $geocodes.lon,
                      lat = ~(jobs%>%filter(median>input$slider1[1] & median<input$slider1[2]&
-      jobs$'score' <= input$crime & (jobs$'Main.Skill'==input$variable|jobs$'Main.Skill'==input$variablee) & jobs$'Job.Category' == input$'speech1') )$geocodes.lat,
+      jobs$'score' <= input$crime & jobs$'Main.Skill' %in% input$variablee & jobs$Full.Time.Part.Time.indicator == input$fulltime &
+        jobs$'Job.Category' == input$'speech1'))$geocodes.lat,
                     stroke = FALSE, fillOpacity = 0.5
                      )
      
