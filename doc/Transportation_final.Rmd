@@ -1,0 +1,88 @@
+---
+title: "R Notebook"
+output: html_notebook
+author: "Daisy qw2658"
+---
+
+```{r}
+###Load data###
+jobs = read.csv('/Users/MacBook/Desktop/jobs.csv')
+bus_count = read.csv('/Users/MacBook/Desktop/Data/bus_count.csv')
+subway_count = read.csv('/Users/MacBook/Desktop/Data/subway_count.csv')
+bus_stops = read.csv('/Users/MacBook/Desktop/Data/bus_stops.csv')
+subway_stops = read.csv('/Users/MacBook/Desktop/Data/subway_stops.csv')
+trans_time = read.csv('/Users/MacBook/Desktop/trans_time1.csv')
+
+
+```
+
+```{r}
+###Boroughs###
+#Subway#
+# subway_count <- 
+#   transform(
+#     subway_count,
+#     Boroughs =
+#       ifelse( zipcode %in% c(10026,10027, 10030, 10037, 10039) , 'Central Harlem' ,
+#               ifelse( zipcode %in% c(10001, 10011, 10018, 10019, 10020, 10036) , 'Chelsea and Clinton' ,
+#                       ifelse( zipcode %in% c(10029, 10035) , 'East Harlem' ,
+#                               ifelse( zipcode %in% c(10010, 10016, 10017, 10022), 'Gramercy Park and Murray Hill', 
+#                                       # ifelse( zipcode %in% c(10004, 10005, 10006, 10007, 10038, 10280), 'Lower Manhattan' ,
+#                                               ifelse( zipcode %in% c(10002, 10003, 10009), 'Lower East Side' ,
+#                                                       ifelse( zipcode %in% c(10021, 10028, 10044, 10065, 10075, 10128), 'Upper East Side' ,
+#                                                               ifelse( zipcode %in% c(10023, 10024, 10025), 'Upper West Side', 'Inwood and Washington Heights')))))))))
+# #Bus#
+# bus_count <- 
+#   transform(
+#     bus_count,
+#     Boroughs =
+#       ifelse( zipcode %in% c(10026,10027, 10030, 10037, 10039) , 'Central Harlem' ,
+#               ifelse( zipcode %in% c(10001, 10011, 10018, 10019, 10020, 10036) , 'Chelsea and Clinton' ,
+#                       ifelse( zipcode %in% c(10029, 10035) , 'East Harlem' ,
+#                               ifelse( zipcode %in% c(10010, 10016, 10017, 10022), 'Gramercy Park and Murray Hill', 
+#                                       ifelse( zipcode %in% c(10004, 10005, 10006, 10007, 10038, 10280), 'Lower Manhattan' ,
+#                                               ifelse( zipcode %in% c(10002, 10003, 10009), 'Lower East Side' ,
+#                                                       ifelse( zipcode %in% c(10021, 10028, 10044, 10065, 10075, 10128), 'Upper East Side' ,
+#                                                               ifelse( zipcode %in% c(10023, 10024, 10025), 'Upper West Side', 'Inwood and Washington Heights')))))))))
+# 
+# write.csv(subway_count, file = "/Users/MacBook/Desktop/subway_count.csv")
+# write.csv(bus_count, file = "/Users/MacBook/Desktop/bus_count.csv")
+
+
+```
+
+```{r}
+###Merge data###
+# jobs = merge(jobs, subway_count, by="zip")
+# jobs= merge(jobs, bus_count, by='zip')
+# jobs= merge(jobs, trans_time, by='zip')
+# 
+# write.csv(jobs,'/Users/MacBook/Desktop/jobs.csv')
+```
+
+```{r}
+###Transportation Time###
+list1 = c(10026, 10027, 10030, 10037, 10039, 10001, 10011, 10018, 10019, 10020, 10036, 10029, 10035, 10010, 10016, 10017, 10022, 10004, 10005, 10006, 10007, 10038, 10280, 10002, 10003, 10009, 10021, 10028, 10044, 10065, 10075, 10128, 10023, 10024, 10025, 10031, 10032, 10033, 10034, 10040)
+trans_time <- matrix(rep(0,length(list1)*length(list1)), nrow=length(list1))
+for (a in 1:length(list1)) {
+  for (b in 1:length(list1)) {
+    print(c(a,b))
+    trans_time[a,b] = as.data.frame(mapdist(as.character(list1[a]), as.character(list1[b]),
+                                 mode = "transit"))$minutes
+  }
+}
+write.csv(trans_time, file = "/Users/MacBook/Desktop/trans_time1.csv")
+```
+
+```{r}
+###Public Transportation Convenience###
+# jobs$Public_Transport = jobs$subway_count + jobs$bus_count
+# jobs$Public_Transport_Convenience = jobs$Public_Transport_Convenience %in%
+#   for (i in Public_Transport) {
+#     if (i >= 10)
+#   }
+# 
+# jobs$Public_Transport_Convenience <- ifelse(jobs$Public_Transport >= 10, "Convenient", ifelse(jobs$Public_Transport < 10 & jobs$Public_Transport >=5 , 'Not Bad', 'Terrible!'))
+
+```
+
