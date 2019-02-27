@@ -2,35 +2,41 @@
 
 ### [Project Description](doc/project2_desc.md)
 
-![screenshot](doc/screenshot2.png)
+![screenshot](lib/donald-trump.png)
 
-In this second project of GR5243 Applied Data Science, we develop a version 2.0 of an *Exploratory Data Analysis and Visualization* shiny app on a topic of your choice using [NYC Open Data](https://opendata.cityofnewyork.us/) or U.S. government open data released on the [data.gov](https://data.gov/) website. See [Project 2 Description](doc/project2_desc.md) for more details.  
-
-The **learning goals** for this project is:
-
-- business intelligence for data science
-- study legacy codes and further development
-- data cleaning
-- data visualization
-- systems development/design life cycle
-- shiny app/shiny server
-
-*The above general statement about project 2 can be removed once you are finished with your project. It is optional.
 
 ## Project Title Lorem ipsum dolor sit amet
 Term: Spring 2019
 
-+ Team #
-+ **Projec title**: + Team members
-	+ team member 1
-	+ team member 2
-	+ team member 3
-	+ team member 4
-	+ team member 5
++ Team # 10
++ **Projec title**: SuperHunt(https://fengsu.shinyapps.io/fengsu/)
+	+ QianQian Wu
+	+ Shaofu Wang
+	+ Hui Chiang Tay
+	+ Feng Su
+	
 
-+ **Project summary**: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
++ **Project summary**:
+![screenshot](lib/screenshot.png)
 
-+ **Contribution statement**: ([default](doc/a_note_on_contributions.md)) All team members contributed equally in all stages of this project. All team members approve our work presented in this GitHub repository including this contributions statement. 
+This app is a job search engine which can provide customised recommendations based on skill sets and prefererences for those who are interested in public service (government) in New York based on their preferences and skill sets. In this specific app, we employed comprehensive datasets such as NYC government jobs, NYC criminal and NYC transportation information. 
+
+On the ¡± All about job¡± map, the first impression a job seeker will get is the distribution of average NYC government salary throughout Manhattan. The deeper the color, the higher the salary and if users stop their mouse on the regions they are interested in, they will get more detailed information of this area. 
+(zipcode and precise figure of average salary). 
+
+On the ¡± Recommendation¡± page, users can locate the jobs which fit them the best by setting the job categories,job type and skill sets within the salary range they can accept. Here, we used a double-sided slider which can identify the salary range more precisely. In addition, after job seekers locate the jobs which fit them the best, they can find job locations on the map with surrounding transportation or entertainment information, since the availability of transportation and recreation on a Friday night seem to be important as well for a job seeker. Finally, the user can further input their zipcode to calculate the time they need to reach the working area. 
+
+
++ **Contribution statement**: ([default](doc/a_note_on_contributions.md))
+Data acquisition and manipulation: Everyone
+Data integration(Acquitted data into one csv): Hui Chiang Tay, QianQian Wu
+UI Design: Feng Su(mostly),QianQian Wu
+Server-Recommendation page: Feng Su(mostly), Hui Chiang Tay(mostly), QianQian Wu, Shaofu Wang
+Server-contact page: QianQian Wu(mostly), Shaofu Wang
+Debug help: Hui Chiang Tay
+Presentation: Shaofu Wang(mostly), Feng Su, Hui Chiang Tay, QianQian Wu
+Github arrangement: Hui Chiang Tay
+
 
 Following [suggestions](http://nicercode.github.io/blog/2013-04-05-projects/) by [RICH FITZJOHN](http://nicercode.github.io/about/#Team) (@richfitz). This folder is orgarnized as follows.
 
