@@ -1,0 +1,161 @@
+---
+title: "Untitled"
+author: "Su Feng(fs2658)"
+date: "2019??2??24??"
+output: html_document
+---
+
+```{r}
+library(shiny)
+library(DT)
+library(varhandle)
+library(magrittr)
+library(sp)
+library(leaflet)
+library(dplyr)
+```
+
+```{r}
+load('../data/subdat.RData')
+zips=read.csv("../data/zips3.csv",stringsAsFactors = F)
+subdat$ZIPCODE=zips$zip[52:102]
+#subdat$zip=zips2$zip[52:109]
+subdat$value=zips$maxsala[52:102]
+labels_sales <- sprintf(
+  "Zip Code: <strong>%s</strong><br/>Average Annual Salary (AAS): <strong>$%g/yr<sup></sup></strong>",
+  as.character(subdat$ZIPCODE), subdat$value
+) %>% lapply(htmltools::HTML)
+```
+
+
+```{r}
+category=c("Administration","Building","Clerical","Communications","Community","Constituent","Engineering","Finance","Health","Information","Legal","Maintenance","Policy","Public","Social","Technology")
+jobs=read.csv('../data/jobs.csv')
+subway <- read.csv('../data/subwayinfo.csv', header=TRUE)
+bar <- read.csv('../data/Bars.csv', header=TRUE)
+bus <- read.csv('../data/bus_stop.csv', header=TRUE)
+Cinema <- read.csv('../data/theatre_dxy.csv', header=TRUE)
+trans_time <- read.csv('../data/trans_time1.csv', header=TRUE)
+subway$on <- 1
+bus$on <- 1
+Cinema$on <- 1
+```
+
+
+```{r}
+ui=fluidPage(includeCSS("../app/style.css"),navbarPage(p(class="h","JobsSmart"),id = "inTabset",
+  tabPanel("All about Jobs",
+           leafletOutput("mymap",height = 1000)),
+  tabPanel("Recommendation",
+           selectInput("speech1","Category:" ,category
+                              ),
+            sliderInput("slider1", label='Median Salary'
+                        ,min=20000,max=250000,value=c(10000,20000)),
+            selectInput("variable", "Main Skill:",
+                c("Policy & Regulation" = "Policy & Regulation", 
+                  "Engineering" = "Engineering", "Database" = "Database", 
+                  "Legal" = "Legal", "Communication & Writing" = "Communication & Writing",
+                  "Systems & Technology" = "Systems & Technology", 
+                  "Leadership" = "Leadership", "Teamwork" = "Teamwork",
+                  "Data Analysis" = "Data Analysis", 
+                  "Microsoft Office" = "Microsoft Office")),
+             selectInput("variablee", "Secondary Skill:",
+                c("Policy & Regulation" = "Policy & Regulation", 
+                  "Engineering" = "Engineering", "Database" = "Database", 
+                  "Legal" = "Legal", "Communication & Writing" = "Communication & Writing",
+                  "Systems & Technology" = "Systems & Technology", 
+                  "Leadership" = "Leadership", "Teamwork" = "Teamwork",
+                  "Data Analysis" = "Data Analysis", 
+                  "Microsoft Office" = "Microsoft Office")),
+            selectInput("crime", "Safety:",
+                c("High" = '18', 
+                  "Medium" = '30', 
+                  "Low" = '99', 
+                  "All" = 'NA')),
+            textInput('zip_input', "Zip:"),
+            checkboxGroupInput("map_select", "Select:",
+                c("Subway" = '1',
+                  "Bus" = '2',
+                  "Cinema" = '3'
+                  )),
+           absolutePanel(top=20,left=380,width=1000,height=3,tags$head(tags$style("#NYC_jobs {white-space: nowrap;}")),
+            dataTableOutput("NYC_jobs"),leafletOutput("mymap2",height = 450))
+),
+tabPanel("Contact",fluidPage(
+  sidebarLayout(
+    sidebarPanel(h1("Contact Information")),
+       mainPanel(
+    # only the last output works
+    
+    hr(),
+    h1(("If you are interested in our project, you can contact us.")),
+    hr(),
+    h6(("Qianqian Wu")),
+    h6(("qw2284@columbia.edu")),
+    h6(("Feng Su")),
+    h6(("fs2658@columbia.edu")),
+    h6(("Hui Chiang Tay")),
+    h6(("ht2490@columbia.edu")),
+    h6(("Shaofu Wang")),
+    h6(("sw3294@columbia.edu"))))
+ ))))
+
+server=function(input, output) {
+  output$mymap <- renderLeaflet({
+   m <- leaflet(data = subdat) %>%
+          addTiles() %>%
+          setView(lng=-73.98928, lat = 40.75042 , zoom =12)%>%
+          addProviderTiles("Stamen.Toner")})
+      pal <- colorNumeric(
+       palette = "Reds",
+       domain = subdat$value
+       )
+     leafletProxy("mymap",data=subdat)%>%
+       addPolygons(layerId = ~ZIPCODE,
+                   stroke = T, weight=1,
+                   fillOpacity = 0.95,
+                   color = ~pal(value),
+                   highlightOptions = highlightOptions(color='#ff0000', opacity = 0.5, weight = 4, fillOpacity = 0.9,bringToFront = TRUE, sendToBack = TRUE),label = labels_sales,
+        labelOptions = labelOptions(
+          style = list("font-weight" = "normal", padding = "3px 8px"),
+          textsize = "15px",
+          direction = "auto"))%>%
+addLegend(pal = pal, values = ~value, opacity = 1)
+     median=jobs$medium
+     
+     output$NYC_jobs=renderDataTable(
+    merge(trans_time[,c('X',paste('X',input$'zip_input',sep=""))],jobs%>%filter(median>input$slider1[1] & median<input$slider1[2]&
+      jobs$'score' <= input$crime & (jobs$'Main.Skill'==input$variable|jobs$'Main.Skill'==input$variablee) & jobs$'Department' == input$'speech1'),  by.x='X', by.y='zip')  
+    ,options = list(pageLength=5, scrollX = TRUE, scrollY = TRUE
+  ))
+     output$mymap2 <- renderLeaflet({
+   m <- leaflet(data=jobs) %>%
+          addTiles() %>%
+          setView(lng=-73.98928, lat=40.75042 , zoom=12)%>%
+          addProviderTiles("Stamen.Toner")%>%
+     addMarkers(lng = ~bus[bus$on == ifelse((2 %in% input$map_select),1,0),]$LONGITUDE,
+                     lat = ~bus[bus$on == ifelse((2 %in% input$map_select),1,0),]$LATITUDE,
+                     icon = list(iconUrl='../lib/bus.png',iconSize=c(15,15)))%>%
+      addMarkers(lng = ~(Cinema[Cinema$on == ifelse((3 %in% input$map_select),1,0),])$lon,
+                     lat = ~(Cinema[Cinema$on == ifelse((3 %in% input$map_select),1,0),])$lat,
+                     icon = list(iconUrl='../lib/Movie.png',iconSize=c(15,15)))%>%
+      addMarkers(lng = ~(subway[subway$on == ifelse((1 %in% input$map_select),1,0),])$Station.Longitude,
+                     lat = ~(subway[subway$on ==ifelse((1 %in% input$map_select),1,0),])$Station.Latitude,
+                     icon = list(iconUrl='../lib/metro.png',iconSize=c(15,15)))%>%
+      addCircleMarkers(lng = ~ (jobs%>%filter(median>input$slider1[1] & median<input$slider1[2]&
+      jobs$'score' <= input$crime & (jobs$'Main.Skill'==input$variable|jobs$'Main.Skill'==input$variablee) & jobs$'Department' == input$'speech1')) $geocodes.lon,
+                     lat = ~(jobs%>%filter(median>input$slider1[1] & median<input$slider1[2]&
+      jobs$'score' <= input$crime & (jobs$'Main.Skill'==input$variable|jobs$'Main.Skill'==input$variablee) & jobs$'Department' == input$'speech1') )$geocodes.lat,
+                    stroke = FALSE, fillOpacity = 0.5
+                     )
+     
+   m
+ })
+  
+}
+shinyApp(ui, server)
+
+```
+
+```
+
