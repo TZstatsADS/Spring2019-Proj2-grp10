@@ -5,7 +5,6 @@
 ![screenshot](lib/donald-trump.png)
 
 
-## Project Title Lorem ipsum dolor sit amet
 Term: Spring 2019
 
 + Team # 10
