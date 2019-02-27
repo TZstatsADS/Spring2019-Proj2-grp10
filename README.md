@@ -9,7 +9,7 @@
 Term: Spring 2019
 
 + Team # 10
-+ **Projec title**: SuperHunt(https://fengsu.shinyapps.io/fengsu/)
++ **Project title**: SuperHunt(https://fengsu.shinyapps.io/fengsu/)
 	+ QianQian Wu
 	+ Shaofu Wang
 	+ Hui Chiang Tay
@@ -19,12 +19,12 @@ Term: Spring 2019
 + **Project summary**:
 ![screenshot](lib/screenshot.png)
 
-This app is a job search engine which can provide customised recommendations based on skill sets and prefererences for those who are interested in public service (government) in New York based on their preferences and skill sets. In this specific app, we employed comprehensive datasets such as NYC government jobs, NYC criminal and NYC transportation information. 
+This app is a job search engine which can provide customised recommendations based on skill sets and preferences for those who are interested in public service (government) in New York based on their preferences and skill sets. In this specific app, we employed comprehensive datasets such as NYC government jobs, NYC criminal and NYC transportation information. 
 
-On the ¡± All about job¡± map, the first impression a job seeker will get is the distribution of average NYC government salary throughout Manhattan. The deeper the color, the higher the salary and if users stop their mouse on the regions they are interested in, they will get more detailed information of this area. 
+On the Â°Â± All about jobÂ°Â± map, the first impression a job seeker will get is the distribution of average NYC government salary throughout Manhattan. The deeper the color, the higher the salary and if users stop their mouse on the regions they are interested in, they will get more detailed information of this area. 
 (zipcode and precise figure of average salary). 
 
-On the ¡± Recommendation¡± page, users can locate the jobs which fit them the best by setting the job categories,job type and skill sets within the salary range they can accept. Here, we used a double-sided slider which can identify the salary range more precisely. In addition, after job seekers locate the jobs which fit them the best, they can find job locations on the map with surrounding transportation or entertainment information, since the availability of transportation and recreation on a Friday night seem to be important as well for a job seeker. Finally, the user can further input their zipcode to calculate the time they need to reach the working area. 
+On the Â°Â± RecommendationÂ°Â± page, users can locate the jobs which fit them the best by setting the job categories, job type and skill sets within the salary range they can accept. Here, we used a double-sided slider which can identify the salary range more precisely. In addition, after job seekers locate the jobs which fit them the best, they can find job locations on the map with surrounding transportation or entertainment information, since the availability of transportation and recreation on a Friday night seem to be important as well for a job seeker. Finally, the user can further input their zipcode to calculate the time they need to reach the working area. 
 
 
 + **Contribution statement**: ([default](doc/a_note_on_contributions.md))
