@@ -7,6 +7,8 @@ library(leaflet)
 library(dplyr)
 library(rgdal)
 library(Rcpp)
+library(shinythemes)
+
 
 load("data/subdat.RData")
 zips=read.csv("data/zips3.csv",stringsAsFactors = F)
@@ -68,9 +70,10 @@ server=function(input, output) {
   median=jobs$medium
   
   output$NYC_jobs=renderDataTable(
-    merge(trans_time[,c('X',paste('X',input$'zip_input',sep=""))],jobs%>%filter(median>input$slider1[1] & median<input$slider1[2]&
-                                                                                  jobs$'score' <= input$crime & jobs$'Full.Time.Part.Time.indicator' == input$fulltime & (jobs$'Main.Skill' %in% input$variable) & jobs$'Job.Category' == input$'speech1'),  by.x='X', by.y='zip')  
-    ,options = list(pageLength=5, scrollX = TRUE, scrollY = TRUE
+    datatable(merge(trans_time[,c('zip',paste('X',input$'zip_input',sep=""))],jobs%>%filter(median>input$slider1[1] & median<input$slider1[2]&
+                                                                                  jobs$'score' <= input$crime & jobs$'Full.Time.Part.Time.indicator' == input$fulltime & (jobs$'Main.Skill' %in% input$variable) & jobs$'Job.Category' == input$'speech1'),  
+          by='zip'))%>%formatStyle('zip',color='white',target='row',backgroundColor='black'), 
+    options = list(pageLength=5, scrollX = TRUE, scrollY = TRUE
     ))
   output$mymap2 <- renderLeaflet({
     m <- leaflet(data=jobs) %>%

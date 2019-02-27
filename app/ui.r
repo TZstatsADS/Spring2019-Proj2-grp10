@@ -7,6 +7,7 @@ library(leaflet)
 library(dplyr)
 library(rgdal)
 library(Rcpp)
+library(shinythemes)
 
 
 category=c("Administration & Human Resources",
@@ -35,7 +36,7 @@ bus$on <- 1
 Cinema$on <- 1
 
 
-ui=fluidPage(includeCSS("style.css"),navbarPage(p(class="h","SuperHunt"),id = "inTabset",
+ui=fluidPage(theme = shinythemes::shinytheme("cyborg"),navbarPage(p(class="h","SuperHunt"),id = "inTabset",
                                                        tabPanel("All about Jobs",
                                                                 leafletOutput("mymap",height = 1000)),
                                                        tabPanel("Recommendation",
@@ -59,7 +60,7 @@ ui=fluidPage(includeCSS("style.css"),navbarPage(p(class="h","SuperHunt"),id = "i
                                                                               "Medium" = '30', 
                                                                               "Low" = '99', 
                                                                               "All" = 'NA')),
-                                                                textInput('zip_input', "Zip:"),
+                                                                textInput('zip_input', "Zip:", value='10027'),
                                                                 checkboxGroupInput("map_select", "Select:",
                                                                                    c("Subway" = '1',
                                                                                      "Bus" = '2',
