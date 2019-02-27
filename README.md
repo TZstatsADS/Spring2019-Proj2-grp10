@@ -27,7 +27,7 @@ On the  'All about job' map, the first impression a job seeker will get is the d
 On the 'Recommendation' page, users can locate the jobs which fit them the best by setting the job categories, job type and skill sets within the salary range they can accept. Here, we used a double-sided slider which can identify the salary range more precisely. In addition, after job seekers locate the jobs which fit them the best, they can find job locations on the map with surrounding transportation or entertainment information, since the availability of transportation and recreation on a Friday night seem to be important as well for a job seeker. Finally, the user can further input their zipcode to calculate the time they need to reach the working area. 
 
 
-+ **Contribution statement**: ([default](doc/a_note_on_contributions.md))
++ **Contribution statement**: ([default](doc/a_note_on_contributions.md))<br>
 Data acquisition and manipulation: Everyone <br>
 Data integration(Acquitted data into one csv): Hui Chiang Tay, QianQian Wu <br>
 UI Design: Feng Su(mostly),QianQian Wu <br>
