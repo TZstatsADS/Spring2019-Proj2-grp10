@@ -61,27 +61,46 @@ ui=fluidPage(includeCSS("../app/style.css"),navbarPage(p(class="h","JobsSmart"),
   tabPanel("All about Jobs",
            leafletOutput("mymap",height = 1000)),
   tabPanel("Recommendation",
+          div(id = "action",actionButton("no_rec2", "Reset",button_type="button", class="btn btn-primary")))),
            selectInput("speech1","Category:" ,category
                               ),
             sliderInput("slider1", label='Median Salary'
                         ,min=20000,max=250000,value=c(10000,20000)),
-            selectInput("variable", "Main Skill:",
-                c("Policy & Regulation" = "Policy & Regulation", 
-                  "Engineering" = "Engineering", "Database" = "Database", 
-                  "Legal" = "Legal", "Communication & Writing" = "Communication & Writing",
-                  "Systems & Technology" = "Systems & Technology", 
-                  "Leadership" = "Leadership", "Teamwork" = "Teamwork",
+            selectInput("variable", "Skill:",
+                c("Architect" = "Architect", 
+                  "Bilingual" = "Bilingual", "Chemical" = "Chemical", 
+                  "Communication & Writing & Teamwork & Research" = "Communication & Writing & Teamwork & Research", 
+                  "Communication & Writing" = "Communication & Writing",
                   "Data Analysis" = "Data Analysis", 
-                  "Microsoft Office" = "Microsoft Office")),
-             selectInput("variablee", "Secondary Skill:",
-                c("Policy & Regulation" = "Policy & Regulation", 
-                  "Engineering" = "Engineering", "Database" = "Database", 
-                  "Legal" = "Legal", "Communication & Writing" = "Communication & Writing",
-                  "Systems & Technology" = "Systems & Technology", 
-                  "Leadership" = "Leadership", "Teamwork" = "Teamwork",
-                  "Data Analysis" = "Data Analysis", 
-                  "Microsoft Office" = "Microsoft Office")),
-            selectInput("crime", "Safety:",
+                  "Database & Systems" = "Database & Systems",
+                  "Electric" = "Electric",
+                  "Engineering" = "Engineering", 
+                  "Environment" = "Environment",
+                  "Leadership & Managerial skills" = "Leadership & Managerial skills",
+                  "Legal" = "Legal",
+                  "Mechanic" = "Mechanic",
+                  "Medical Knowledge" = "Medical Knowledge",
+                  "Other" = "Other",
+                  "Policy & Regulation" = "Policy & Regulation",
+                  "Quantitative Analytics" = "Quantitative Analytics"), multiple=TRUE),
+           selectInput("variable2", "Boroughs:",
+                c("Central Harlem" = "Central Harlem", 
+                  "Chelsea and Clinton" = "Chelsea and Clinton",
+                  "East Harlem" = "East Harlem", 
+                  "Gramercy Park and Murray Hill" = "Gramercy Park and Murray Hill", 
+                  "Lower Manhattan" = "Lower Manhattang",
+                  "Lower East Side" = "Lower East Side", 
+                  "Upper East Side" = "Upper East Side",
+                  "Upper West Side" = "Upper West Side",
+                  "Inwood and Washington Heights" = "Inwood and Washington Heights")),
+           selectInput("variable3", "Public Transportion:",
+                       c("Convenient" = "Convenient",
+                        "Not Bad" = "Not Bad",
+                        "Terrible!" = "Terrible!")),
+            selectInput("variable4", "Full Time/Part Time:",
+                       c("F" = "F",
+                        "P" = "P")),
+            selectInput("crime", "Safety level:",
                 c("High" = '18', 
                   "Medium" = '30', 
                   "Low" = '99', 
@@ -94,7 +113,7 @@ ui=fluidPage(includeCSS("../app/style.css"),navbarPage(p(class="h","JobsSmart"),
                   )),
            absolutePanel(top=20,left=380,width=1000,height=3,tags$head(tags$style("#NYC_jobs {white-space: nowrap;}")),
             dataTableOutput("NYC_jobs"),leafletOutput("mymap2",height = 450))
-),
+)
 tabPanel("Contact",fluidPage(
   sidebarLayout(
     sidebarPanel(h1("Contact Information")),
@@ -104,14 +123,14 @@ tabPanel("Contact",fluidPage(
     hr(),
     h1(("If you are interested in our project, you can contact us.")),
     hr(),
-    h6(("Qianqian Wu")),
-    h6(("qw2284@columbia.edu")),
-    h6(("Feng Su")),
+    h2(("Feng Su")),
     h6(("fs2658@columbia.edu")),
-    h6(("Hui Chiang Tay")),
+    h2(("Hui Chiang Tay")),
     h6(("ht2490@columbia.edu")),
-    h6(("Shaofu Wang")),
-    h6(("sw3294@columbia.edu"))))
+    h2(("Shaofu Wang")),
+    h6(("sw3294@columbia.edu")),
+    h2(("Qianqian Wu")),
+    h6(("qw2284@columbia.edu"))
  ))))
 
 server=function(input, output) {
@@ -139,7 +158,7 @@ addLegend(pal = pal, values = ~value, opacity = 1)
      
      output$NYC_jobs=renderDataTable(
     merge(trans_time[,c('X',paste('X',input$'zip_input',sep=""))],jobs%>%filter(median>input$slider1[1] & median<input$slider1[2]&
-      jobs$'score' <= input$crime & (jobs$'Main.Skill'==input$variable|jobs$'Main.Skill'==input$variablee) & jobs$'Job.Category' == input$'speech1'),  by.x='X', by.y='zip')  
+      jobs$'score' <= input$crime & (jobs$'Main.Skill'==input$variable|jobs$'Main.Skill'==input$variablee) & jobs$'Department' == input$'speech1'),  by.x='X', by.y='zip')  
     ,options = list(pageLength=5, scrollX = TRUE, scrollY = TRUE
   ))
      output$mymap2 <- renderLeaflet({
@@ -157,9 +176,9 @@ addLegend(pal = pal, values = ~value, opacity = 1)
                      lat = ~(subway[subway$on ==ifelse((1 %in% input$map_select),1,0),])$Station.Latitude,
                      icon = list(iconUrl='../lib/metro.png',iconSize=c(15,15)))%>%
       addCircleMarkers(lng = ~ (jobs%>%filter(median>input$slider1[1] & median<input$slider1[2]&
-      jobs$'score' <= input$crime & (jobs$'Main.Skill'==input$variable|jobs$'Main.Skill'==input$variablee) & jobs$'Job.Category' == input$'speech1')) $geocodes.lon,
+      jobs$'score' <= input$crime & (jobs$'Main.Skill'==input$variable|jobs$'Skill'==input$variablee) & jobs$'Occupations' == input$'speech1' & jobs$'Boroughs' == input$'variable2' & jobs$'Public_Transport_Convenience' == input$'variable3' & jobs$'Full.Time.Part.Time.indicator' == input$'variable4')) $geocodes.lon,
                      lat = ~(jobs%>%filter(median>input$slider1[1] & median<input$slider1[2]&
-      jobs$'score' <= input$crime & (jobs$'Main.Skill'==input$variable|jobs$'Main.Skill'==input$variablee) & jobs$'Job.Category' == input$'speech1') )$geocodes.lat,
+      jobs$'score' <= input$crime & (jobs$'Main.Skill'==input$variable|jobs$'Main.Skill'==input$variablee) & jobs$'Occupations' == input$'speech1' & jobs$'Boroughs' == input$'variable2' & jobs$'Public_Transport_Convenience' == input$'variable3' & jobs$'Full.Time.Part.Time.indicator' == input$'variable4') )$geocodes.lat,
                     stroke = FALSE, fillOpacity = 0.5
                      )
      
