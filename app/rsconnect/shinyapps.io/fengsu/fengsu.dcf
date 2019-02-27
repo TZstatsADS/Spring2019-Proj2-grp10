@@ -5,8 +5,8 @@ account: fengsu
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 742471
-bundleId: 1903758
+bundleId: 1903823
 url: https://fengsu.shinyapps.io/fengsu/
-when: 1551281861.08483
+when: 1551283108.40844
 asMultiple: FALSE
 asStatic: FALSE
